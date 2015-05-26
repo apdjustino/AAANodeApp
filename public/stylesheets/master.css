@@ -171,3 +171,32 @@ These stiles are for the ACS slide
     width:100%;
 
 }
+
+
+/****************************
+*****************************
+These stiles are for the map slide
+*****************************
+*****************************/
+
+
+path.block-groups{
+    fill:none;
+    stroke:black;
+    stroke-width:1;
+}
+
+#map-controls{
+    position:absolute;
+    top:80%;
+    z-index:9999;
+    width:65%;
+}
+
+.q0-7 {fill:#eff3ff; opacity:5;}
+.q1-7 {fill:#c6dbef; opacity:5;}
+.q2-7 {fill:#9ecae1; opacity:5;}
+.q3-7 {fill:#6baed6; opacity:5;}
+.q4-7 {fill:#4292c6; opacity:5;}
+.q5-7 {fill:#2171b5; opacity:5;}
+.q6-7 {fill:#084594; opacity:5;}
