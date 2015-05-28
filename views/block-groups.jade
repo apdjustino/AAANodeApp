@@ -4,6 +4,13 @@ extends layout
 block content
    div(id="mapCanvas" ng-controller="block-groups-ctrl")
        div(id="map-controls" class="row")
+           div(class="layerControls")
+               label() Display Churches
+                    input(class="form-control check" type="checkbox" ng-model="checked")
+               label() Display Transit Routes
+                    input(class="form-control check" type="checkbox" ng-model="routeChecked")
+               label() Display Transit Stops
+                    input(class="form-control check" type="checkbox" ng-model="stopsChecked")
            div(class="col-lg-3")
                 select(class="form-control map-inputs", ng-model="selectedDataTable" ng-options="table for table in dataTable")
             div(class="col-lg-3")
@@ -12,8 +19,12 @@ block content
                 select(class="form-control map-inputs" multiple ng-model="selectedAgeGrp" ng-options="age for age in ageGrp")
             div(class="col-lg-3")
                 button(class="btn btn-default" ng-click="query()") Query
+
+
+
    a(class="chevron", id="backward", href="/aging-demographics#/acs", style="z-index:9999") &lsaquo;
    a(class="chevron", id="forward" href="#" style="left:96%; z-index:9999") &rsaquo;
+
 
 
    script(src="https://ajax.googleapis.com/ajax/libs/angularjs/1.3.15/angular.min.js")

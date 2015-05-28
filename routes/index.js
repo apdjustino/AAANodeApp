@@ -108,9 +108,9 @@ router.post('/query-demographics', function(req, res, next){
 
         var raceAge = raceArr.concat(ageArr);
 
-        var queryText = 'SELECT blk_grps."GEOid2", blk_grps.county, sum(value) as "grp_tot", tot, sum(value)/nullif(tot,0) as "pct" ' +
+        var queryText = 'SELECT blk_grps."GEOid2", blk_grps.county, sum(value) as "grp_tot", tot_dem, tot_inc, sum(value)/nullif(tot_dem,0) as "pct" ' +
             'from blk_grps, demographics where blk_grps."GEOid2" = demographics."GEOid2" AND race IN(' + params1.join(',') +
-            ') AND age_sex_grp IN(' + params2.join(',') + ') GROUP BY blk_grps."GEOid2", blk_grps.county, blk_grps.tot';
+            ') AND age_sex_grp IN(' + params2.join(',') + ') GROUP BY blk_grps."GEOid2", blk_grps.county, tot_dem, tot_inc';
 
         client.query(queryText,raceAge,
             function(err,result){
@@ -147,9 +147,9 @@ router.post('/query-income', function(req, res, next){
 
         var raceAge = raceArr.concat(ageArr);
 
-        var queryText = 'SELECT blk_grps."GEOid2", blk_grps.county, sum(value) as "grp_tot", tot, sum(value)/nullif(tot,0) as "pct" ' +
+        var queryText = 'SELECT blk_grps."GEOid2", blk_grps.county, sum(value) as "grp_tot", tot_dem, tot_inc, sum(value)/nullif(tot_inc,0) as "pct" ' +
             'from blk_grps, income where blk_grps."GEOid2" = income."GEOid2" AND income_grp IN(' + params1.join(',') +
-            ') AND age_grp IN(' + params2.join(',') + ') GROUP BY blk_grps."GEOid2", blk_grps.county, blk_grps.tot';
+            ') AND age_grp IN(' + params2.join(',') + ') GROUP BY blk_grps."GEOid2", blk_grps.county, tot_dem, tot_inc';
 
         client.query(queryText,raceAge,
             function(err,result){

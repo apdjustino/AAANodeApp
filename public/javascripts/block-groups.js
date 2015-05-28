@@ -11,6 +11,10 @@ app.controller('block-groups-ctrl', function($scope, $http){
 
     $scope.dataTable = ['Demographics', 'Income'];
     $scope.selectedDataTable = $scope.dataTable[0];
+    $scope.checked = false;
+    $scope.routeChecked = false;
+    $scope.stopsChecked = false;
+    var mapById = d3.map();
 
 
     //get input control data
@@ -58,6 +62,45 @@ app.controller('block-groups-ctrl', function($scope, $http){
 
     })
 
+    $scope.$watch('checked', function(nv, ov){
+        if(nv !== ov){
+            if(nv === true){
+                addChurches();
+            }
+            else{
+                g.selectAll("circle")
+                    .remove();
+            }
+
+        }
+    })
+
+    $scope.$watch('routeChecked', function(nv, ov){
+        if(nv !== ov){
+            if(nv === true){
+                addRoutes();
+            }
+            else{
+                g.selectAll("circle")
+                    .remove();
+            }
+
+        }
+    })
+
+    $scope.$watch('stopsChecked', function(nv, ov){
+        if(nv !== ov){
+            if(nv === true){
+                addStops();
+            }
+            else{
+                g.selectAll("circle")
+                    .remove();
+            }
+
+        }
+    })
+
 
     $scope.query = function(){
        if($scope.selectedDataTable === 'Demographics'){
@@ -65,7 +108,7 @@ app.controller('block-groups-ctrl', function($scope, $http){
 
            $http.post('/query-demographics', dataToSend)
                .success(function(response){
-                   colorMap(response); //call d3 function that will color map
+                   setMap(response);
                })
 
        }
@@ -74,7 +117,7 @@ app.controller('block-groups-ctrl', function($scope, $http){
 
            $http.post('/query-income', dataToSend)
                .success(function(response){
-                   colorMap(response); //call d3 function that will color map
+                   setMap(response); //call d3 function that will color map
                })
        }
 
@@ -131,19 +174,9 @@ app.controller('block-groups-ctrl', function($scope, $http){
 
     //load data
 
-    function action(){
-
-        queue()
-            .defer(d3.json, 'data/block-group.json')
-            .await(loadShapes)
-
-    }
 
     var svg = d3.select(map.getPanes().overlayPane).append("svg");
     var g = svg.append("g").attr("class", "leaflet-zoom-hide");
-    var mapById = d3.map();
-    var quantize = d3.scale.quantize()
-        .range(d3.range(7).map(function(i){return "q" + i + "-7";}));
 
     function loadShapes(error, blockGrp){
 
@@ -156,7 +189,10 @@ app.controller('block-groups-ctrl', function($scope, $http){
             .data(shape.features)
             .enter()
             .append("path")
-            .attr("class", "block-groups");
+            .attr("class", "q0-7 zones");
+
+        var title= feature.append("svg:title")
+            .attr("class", "pathTitle");
 
 
         map.on("viewreset", reset);
@@ -175,6 +211,24 @@ app.controller('block-groups-ctrl', function($scope, $http){
 
             feature.attr("d", path);
 
+            try{
+                g.selectAll("circle").attr("cx", function(d){
+                    var x = d.lon;
+                    var y = d.lat;
+                    var coord = map.latLngToLayerPoint(new L.LatLng(y,x));
+                    return coord.x;
+                }).attr("cy", function(d){
+                    var x = d.lon;
+                    var y = d.lat;
+                    var coord = map.latLngToLayerPoint(new L.LatLng(y,x));
+                    return coord.y;
+                })
+
+            }
+            catch(e)
+            {
+                console.log(e);
+            }
 
         }
 
@@ -185,12 +239,85 @@ app.controller('block-groups-ctrl', function($scope, $http){
 
     }
 
-    action();
+    function setMap(data){
+        var pctArr = [];
+        data.forEach(function(cv, index, arr){
+           mapById.set(cv.GEOid2, {
+               "county":cv.county,
+               "grp_tot":cv.grp_tot,
+               "tot_dem":cv.tot_dem,
+               "tot_inc":cv.tot_inc,
+               "pct":cv.pct
+           });
+           pctArr.push(cv.pct)
+        });
+        var max = Math.max.apply(null, pctArr);
+        console.log(max);
+        quantize.domain([0,max]);
 
-    //variables for map classification
+        d3.json('data/block-group.json', function(error, blkGrp){
+            var shape = topojson.feature(blkGrp, blkGrp.objects.bg10);
+            var feature = g.selectAll("path")
+                .attr("class", "")
 
+            feature
+                .data(shape.features)
+                .attr("class", function(d){
+                    try{
+                        return quantize(mapById.get(d.properties.GEOID10).pct) + " zones";
+                    }
+                    catch(e){
+                        return "empty";
+                    }
+                });
 
+            d3.selectAll(".pathTitle")
+                .data(shape.features)
+                .text(function(d){
+                    try{
+                        return "Total Pop: " + mapById.get(d.properties.GEOID10).tot_dem + "\n" +
+                                "Total HH: "  + mapById.get(d.properties.GEOID10).tot_inc + "\n" +
+                                "Query Pop: " + mapById.get(d.properties.GEOID10).grp_tot + "\n" +
+                                "Pct: " + mapById.get(d.properties.GEOID10).pct + "\n" +
+                                "County: " + mapById.get(d.properties.GEOID10).county;
+                    }
+                    catch(e){
+                        return "N/A";
+                    }
 
+                });
+        });
+    }
+    function addChurches(){
+        d3.csv('data/churches.csv', function(error, churches){
+            var churches = g.selectAll("circle")
+                .data(churches)
+                .enter()
+                .append("circle")
+                .attr("r", 3)
+                .attr("cx", function(d){
+                    var x = d.lon;
+                    var y = d.lat;
+                    var coord = map.latLngToLayerPoint(new L.LatLng(y,x));
+                    return coord.x;
+                })
+                .attr("cy", function(d){
+                    var x = d.lon;
+                    var y = d.lat;
+                    var coord = map.latLngToLayerPoint(new L.LatLng(y,x));
+                    return coord.y;
+                })
 
+            churches.append("svg:title")
+                .text(function(d){return d.name;});
+
+        });
+    }
+//variables for map classification
+    var quantize = d3.scale.quantize()
+        .range(d3.range(7).map(function(i){return "q" + i + "-7";}));
+
+    //initial map load
+    queue().defer(d3.json, 'data/block-group.json').await(loadShapes);
 
 });
