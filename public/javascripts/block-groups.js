@@ -15,6 +15,7 @@ app.controller('block-groups-ctrl', function($scope, $http){
     $scope.routeChecked = false;
     $scope.stopsChecked = false;
     var mapById = d3.map();
+    var percent = d3.format(",.1%");
 
 
     //get input control data
@@ -81,7 +82,7 @@ app.controller('block-groups-ctrl', function($scope, $http){
                 addRoutes();
             }
             else{
-                g.selectAll("circle")
+                g.selectAll(".routes")
                     .remove();
             }
 
@@ -94,7 +95,7 @@ app.controller('block-groups-ctrl', function($scope, $http){
                 addStops();
             }
             else{
-                g.selectAll("circle")
+                g.selectAll(".stops")
                     .remove();
             }
 
@@ -223,12 +224,18 @@ app.controller('block-groups-ctrl', function($scope, $http){
                     var coord = map.latLngToLayerPoint(new L.LatLng(y,x));
                     return coord.y;
                 })
+                g.selectAll(".routes")
+                    .attr("d", path);
+                g.selectAll(".stops")
+                    .attr("d", path);
+
 
             }
             catch(e)
             {
                 console.log(e);
             }
+
 
         }
 
@@ -258,7 +265,7 @@ app.controller('block-groups-ctrl', function($scope, $http){
         d3.json('data/block-group.json', function(error, blkGrp){
             var shape = topojson.feature(blkGrp, blkGrp.objects.bg10);
             var feature = g.selectAll("path")
-                .attr("class", "")
+                //.attr("class", "")
 
             feature
                 .data(shape.features)
@@ -278,7 +285,7 @@ app.controller('block-groups-ctrl', function($scope, $http){
                         return "Total Pop: " + mapById.get(d.properties.GEOID10).tot_dem + "\n" +
                                 "Total HH: "  + mapById.get(d.properties.GEOID10).tot_inc + "\n" +
                                 "Query Pop: " + mapById.get(d.properties.GEOID10).grp_tot + "\n" +
-                                "Pct: " + mapById.get(d.properties.GEOID10).pct + "\n" +
+                                "Pct: " + percent(mapById.get(d.properties.GEOID10).pct) + "\n" +
                                 "County: " + mapById.get(d.properties.GEOID10).county;
                     }
                     catch(e){
@@ -313,6 +320,60 @@ app.controller('block-groups-ctrl', function($scope, $http){
 
         });
     }
+
+    function addRoutes(){
+        d3.json('data/routes.json', function(error, routes){
+
+            var shape = topojson.feature(routes, routes.objects.routes2);
+            var transform = d3.geo.transform({point: projectPoint}),
+                path = d3.geo.path().projection(transform);
+
+            var routes = g.selectAll(".routes")
+                .data(shape.features)
+                .enter()
+                .append("path")
+                .attr("class", "routes")
+                .attr("d", path);
+
+
+
+            function projectPoint(x, y) {
+                var point = map.latLngToLayerPoint(new L.LatLng(y, x));
+                this.stream.point(point.x, point.y);
+            }
+
+        });
+
+
+    }
+
+    function addStops(){
+        d3.json('data/stops.json', function(error, stops){
+
+            var shape = topojson.feature(stops, stops.objects.stops2);
+            var transform = d3.geo.transform({point: projectPoint}),
+                path = d3.geo.path().projection(transform);
+
+            var stops = g.selectAll(".stops")
+                .data(shape.features)
+                .enter()
+                .append("path")
+                .attr("class", "stops")
+                .attr("d", path);
+
+
+
+            function projectPoint(x, y) {
+                var point = map.latLngToLayerPoint(new L.LatLng(y, x));
+                this.stream.point(point.x, point.y);
+            }
+
+        });
+
+
+    }
+
+
 //variables for map classification
     var quantize = d3.scale.quantize()
         .range(d3.range(7).map(function(i){return "q" + i + "-7";}));

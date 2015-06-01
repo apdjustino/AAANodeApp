@@ -189,8 +189,8 @@ path.zones:hover{
 }
 
 #map-controls{
-    position:absolute;
-    top:80%;
+    position:fixed;
+    top:90%;
     z-index:9999;
     width:85%;
 }
@@ -222,4 +222,16 @@ circle{
 
 label{
     margin-top:10px;
+}
+
+.routes{
+    stroke:#A22E3B;
+    stroke-width:1;
+    fill:none;
+
+}
+
+.stops{
+    fill:#D99937;
+
 }

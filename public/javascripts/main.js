@@ -15,6 +15,9 @@ app.config(['$routeProvider', function($routeProvider){
     }).when('/acs', {
         templateUrl: 'views/acs.html',
         controller: 'acs-ctrl'
+    }).when('/region-demographics', {
+        templateUrl: 'views/region-demographics.html',
+        controller: 'demo-ctrl'
     });
 
 }])
