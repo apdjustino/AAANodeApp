@@ -125,53 +125,56 @@ app.controller('block-groups-ctrl', function($scope, $http){
     }
 
     //build map
-    var map = L.map('mapCanvas').setView([39.75, -104.95], 10);
+    var googleStreets = new L.Google('ROADMAP');
+    var map = L.map('mapCanvas', {layers:[googleStreets]}).setView([39.75, -104.95], 10);
 
-    L.tileLayer('http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
+    //L.tileLayer('http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
 
-    var drawnItems = new L.FeatureGroup();
-    map.addLayer(drawnItems);
+    //draw controls
 
-    var drawControl = new L.Control.Draw({
-        draw: {
-            position: 'topleft',
-            polygon: {
-                title: 'Draw a sexy polygon!',
-                allowIntersection: false,
-                drawError: {
-                    color: '#b00b00',
-                    timeout: 1000
-                },
-                shapeOptions: {
-                    color: '#bada55'
-                },
-                showArea: true
-            },
-            polyline: {
-                metric: false
-            },
-            circle: {
-                shapeOptions: {
-                    color: '#662d91'
-                }
-            }
-        },
-        edit: {
-            featureGroup: drawnItems
-        }
-    });
-    map.addControl(drawControl);
-
-    map.on('draw:created', function (e) {
-        var type = e.layerType,
-            layer = e.layer;
-
-        if (type === 'marker') {
-            layer.bindPopup('A popup!');
-        }
-
-        drawnItems.addLayer(layer);
-    });
+    //var drawnItems = new L.FeatureGroup();
+    //map.addLayer(drawnItems);
+    //
+    //var drawControl = new L.Control.Draw({
+    //    draw: {
+    //        position: 'topleft',
+    //        polygon: {
+    //            title: 'Draw a sexy polygon!',
+    //            allowIntersection: false,
+    //            drawError: {
+    //                color: '#b00b00',
+    //                timeout: 1000
+    //            },
+    //            shapeOptions: {
+    //                color: '#bada55'
+    //            },
+    //            showArea: true
+    //        },
+    //        polyline: {
+    //            metric: false
+    //        },
+    //        circle: {
+    //            shapeOptions: {
+    //                color: '#662d91'
+    //            }
+    //        }
+    //    },
+    //    edit: {
+    //        featureGroup: drawnItems
+    //    }
+    //});
+    //map.addControl(drawControl);
+    //
+    //map.on('draw:created', function (e) {
+    //    var type = e.layerType,
+    //        layer = e.layer;
+    //
+    //    if (type === 'marker') {
+    //        layer.bindPopup('A popup!');
+    //    }
+    //
+    //    drawnItems.addLayer(layer);
+    //});
 
     //load data
 

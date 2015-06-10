@@ -20,6 +20,10 @@ router.get('/block-groups', function(req, res, next){
     res.render('block-groups', {title: 'Block Groups'});
 });
 
+router.get('/block-groups-gis', function(req, res, next){
+   res.sendFile('public/views/block-groups-gis.html', {root: './'});
+});
+
 router.get('/races', function(req, res, next){
     pg.connect(conString, function(err, client, done){
         if(err){
